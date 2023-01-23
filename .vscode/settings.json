@@ -1,0 +1,8 @@
+{
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintArgs": [
+        "--rcfile=${env:HOME}/TWStock_Price_Predictor/.pylintrc",
+        "--disable=C0111"
+    ]
+}
