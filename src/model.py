@@ -10,10 +10,14 @@ class PricePredictor(nn.Module):
                             dropout=args.dropout,
                             bidirectional=True,
                             batch_first=True)
-        self.fc = nn.Linear(args.hidden_size, 1, bias=False)
+        self.fcs = nn.ModuleList()
+        for _ in range(args.fc_layer - 1):
+            self.fcs.append(nn.Linear(args.hidden_size, args.hidden_size))
+        self.fcs.append(nn.Linear(args.hidden_size, 1))
 
     def forward(self, x):
         _, (h, _) = self.lstm(x)
         x = h[-1]
-        x = self.fc(x)
+        for fc in self.fcs:
+            x = fc(x)
         return x
