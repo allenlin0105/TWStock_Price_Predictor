@@ -39,15 +39,17 @@ def main():
         year_month2day_prices_dict[year_month].append([date.day, 
             stock.open[i], stock.close[i], stock.low[i], stock.high[i]])
 
+    print('Saving price info...')
     data_folder = Path(DATA_FOLDER, stock_code)
     data_folder.mkdir(parents=True, exist_ok=True)
-    for year_month, date_prices_list in tqdm(year_month2day_prices_dict.items(), desc='Saving price info'):
+    for year_month, date_prices_list in year_month2day_prices_dict.items():
         date_prices_list.sort(key=lambda x: x[0])
         with open(data_folder.joinpath(f'{year_month}.csv'), 'w', encoding='utf-8') as fp:
             writer = csv.writer(fp)
             writer.writerow(['date', 'open', 'close', 'low', 'high'])
             for date_prices in date_prices_list:
                 writer.writerow([f'{year_month}_{date_prices[0]:02d}'] + date_prices[1:])
+    print('Done')
 
 
 if __name__ == "__main__":
