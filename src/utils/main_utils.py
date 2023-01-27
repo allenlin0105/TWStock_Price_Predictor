@@ -1,3 +1,4 @@
+import json
 import random
 import logging
 from pathlib import Path
@@ -34,6 +35,14 @@ def get_model_folder(stock_code):
     model_folder.mkdir()
 
     return model_folder
+
+
+def save_params(saved_object, params_file):
+    for key, value in saved_object.items():
+        if isinstance(value, torch.device) or isinstance(value, Path):
+            saved_object[key] = str(saved_object[key])
+    with open(params_file, "w", encoding='utf-8') as fp:
+        json.dump(saved_object, fp, indent=4)
 
 
 def set_up_logger(log_file):
