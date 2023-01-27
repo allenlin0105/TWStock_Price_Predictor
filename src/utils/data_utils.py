@@ -42,7 +42,7 @@ def read_data(stock_code, year):
 def split_data(raw_dates, scaled_prices, split, do_valid=False):
     input_date_period = 20  # use 20 days to predict
 
-    train_ratio = 0.8 if do_valid else 1.0
+    train_ratio = 0.9 if do_valid else 1.0
     if split == TRAIN:
         bound = int(len(raw_dates) * train_ratio)
         dates = raw_dates[:bound]
