@@ -106,3 +106,7 @@ def train(args):
             writer.writerow(['date', 'label_price', 'predicted_price'])
             for date, label_price, pred_price in valid_prices:
                 writer.writerow([date, label_price, pred_price])
+
+
+def test(args):
+    return

@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 import torch
 
 from .utils.main_utils import fix_random_seed, get_model_folder, set_up_logger
-from .utils.train_utils import train
+from .utils.train_test_utils import train, test
 
 
 def main():
@@ -22,16 +22,28 @@ def main():
     parser.add_argument("--batch_size", type=int, default=64, help="batch size for training")
     parser.add_argument("--n_epoch", type=int, default=10, help="number of training epoch")
 
+    parser.add_argument("--do_train", action='store_true',
+                        help="Do training")
     parser.add_argument("--do_valid", action="store_true",
                         help="Split part of the data to do validation")
+    parser.add_argument("--do_test", action="store_true",
+                        help="Do testing on future timestamps")
     args = parser.parse_args()
+
+    if args.do_valid:
+        assert args.do_train, "Should add --do_train if you add --do_valid"
 
     args.model_folder = get_model_folder(args.data_stock_code_year[0])
     args.logger = set_up_logger(args.model_folder.joinpath('train_log.log'))
     args.device = args.device if torch.cuda.is_available() else torch.device('cpu')
 
     fix_random_seed(args.seed)
-    train(args)
+
+    if args.do_train:
+        train(args)
+
+    if args.do_test:
+        test(args)
 
 
 if __name__ == "__main__":
