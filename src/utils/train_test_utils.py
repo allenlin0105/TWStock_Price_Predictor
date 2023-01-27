@@ -8,6 +8,7 @@ from tqdm import tqdm
 from sklearn.preprocessing import MinMaxScaler
 
 from .data_utils import read_data, split_data, StockDataset
+from .loss_utils import RMSELoss, MAPELoss
 from ..model import PricePredictor
 from ..constants import TRAIN, VALID, PREDICTION_FOLDER
 
@@ -17,8 +18,6 @@ def train(args):
     logger = args.logger
     device = args.device
     model_folder = args.model_folder
-
-    logger.info(args)
 
     splits = [TRAIN]
     if do_valid:
@@ -40,9 +39,18 @@ def train(args):
     ) for split, dataset in datasets.items()}
 
     model = PricePredictor(args).to(device)
-    loss_func = nn.MSELoss()
+    if args.loss_func == 'mse':
+        loss_func = nn.MSELoss()
+    elif args.loss_func == 'rmse':
+        loss_func = RMSELoss()
+    elif args.loss_func == 'mape':
+        loss_func = MAPELoss()
+    else:
+        raise ValueError('The loss function is not defined.')
     optimizer = optim.AdamW(model.parameters(), lr=args.lr)
     # scheduler = ExponentialLR(optimizer, gamma=0.95)
+
+    logger.info(model)
 
     prediction_folder = model_folder.joinpath(PREDICTION_FOLDER)
     prediction_folder.mkdir(parents=True, exist_ok=True)
