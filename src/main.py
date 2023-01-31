@@ -3,7 +3,8 @@ from argparse import ArgumentParser
 import torch
 
 from .constants import LOG_FILE
-from .utils.main_utils import fix_random_seed, get_model_folder, save_params, set_up_logger
+from .utils.main_utils import (fix_random_seed, create_new_model_folder,
+    get_exist_model_folder, save_params, set_up_logger)
 from .utils.train_test_utils import train, test
 
 
@@ -39,17 +40,18 @@ def main():
     if args.do_valid:
         assert args.do_train, "Should add --do_train if you add --do_valid"
 
-    args.model_folder = get_model_folder(args.data_stock_code_year[0])
     args.device = args.device if torch.cuda.is_available() else torch.device('cpu')
 
     fix_random_seed(args.seed)
 
     if args.do_train:
+        args.model_folder = create_new_model_folder(args.stock_code)
         save_params(vars(args).copy(), args.model_folder.joinpath('params.json'))
         args.logger = set_up_logger(args.model_folder.joinpath(LOG_FILE))
         train(args)
 
     if args.do_test:
+        args.model_folder = get_exist_model_folder(args.stock_code, args.test_ckpt_index)
         test(args)
 
 

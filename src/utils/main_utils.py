@@ -20,7 +20,7 @@ def fix_random_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 
-def get_model_folder(stock_code):
+def create_new_model_folder(stock_code):
     model_folder = Path(MODEL_CKPT_FOLDER, stock_code)
     model_folder.mkdir(parents=True, exist_ok=True)
 
@@ -35,6 +35,14 @@ def get_model_folder(stock_code):
     model_folder.mkdir()
 
     return model_folder
+
+def get_exist_model_folder(stock_code, ckpt_index):
+    model_folder = Path(MODEL_CKPT_FOLDER, stock_code)
+    if ckpt_index is None:
+        existed_ckpt_indices = [int(file_path.name) for file_path in model_folder.iterdir()]
+        ckpt_index = max(existed_ckpt_indices)
+    model_folder = model_folder.joinpath(f'{ckpt_index:03d}')
+    return  model_folder
 
 
 def save_params(saved_object, params_file):
