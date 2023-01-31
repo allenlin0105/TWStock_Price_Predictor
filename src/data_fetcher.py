@@ -2,8 +2,6 @@ import csv
 import argparse
 from pathlib import Path
 
-from tqdm import tqdm
-
 from .constants import DATA_FOLDER
 from .twstock import __update_codes, Stock
 
