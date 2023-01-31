@@ -13,6 +13,7 @@ numpy = "*"
 pandas = "*"
 seaborn = "*"
 scikit-learn = "*"
+joblib = "*"
 
 [dev-packages]
 
