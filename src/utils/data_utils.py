@@ -5,7 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset
 
-from ..constants import DATA_FOLDER, TRAIN, VALID
+from ..constants import DATA_FOLDER, TRAIN, VALID, TEST
 
 
 class StockDataset(Dataset):
@@ -51,12 +51,16 @@ def split_data(raw_dates, scaled_prices, split, do_valid=False):
         bound = int(len(raw_dates) * train_ratio) - input_date_period
         dates = raw_dates[bound:]
         close_prices = scaled_prices[bound:, :].reshape(-1)
+    elif split == TEST:
+        close_prices = scaled_prices[-input_date_period:, :].reshape(-1)
+        close_prices = np.append(close_prices, 0)
     else:
-        raise ValueError('split variable should be "train" or "test"')
+        raise ValueError('split variable should be "train", "valid", or "test"')
 
     feed_data = {'source': [], 'label': [], 'predict_date': []}
     for i in range(0, len(close_prices) - input_date_period):
         feed_data['source'].append(close_prices[i: i + input_date_period].tolist())
-        feed_data['label'].append(close_prices[i + input_date_period])
-        feed_data['predict_date'].append(dates[i + input_date_period])
+        if split == TRAIN or split == VALID:
+            feed_data['label'].append(close_prices[i + input_date_period])
+            feed_data['predict_date'].append(dates[i + input_date_period])
     return feed_data
