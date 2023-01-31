@@ -11,10 +11,10 @@ from .utils.train_test_utils import train, test
 def main():
     parser = ArgumentParser()
 
-    parser.add_argument("--data_stock_code_year", type=str, nargs='+', required=True,
-                        help="specify the data for training")
+    parser.add_argument("--stock_code", type=str, default="2330", 
+                        help="stock code for training and testing")
     parser.add_argument("--device", type=torch.device, default="cuda",
-                        help="the device to train the model")
+                        help="the device to train and test the model")
 
     # model
     parser.add_argument("--hidden_size", type=int, default=128, help="hidden size of lstm")
@@ -33,8 +33,13 @@ def main():
                         help="Do training")
     parser.add_argument("--do_valid", action="store_true",
                         help="Split part of the data to do validation")
+    parser.add_argument("--train_start_year", type=int, default=2010,
+                        help="start year for training")
+
     parser.add_argument("--do_test", action="store_true",
                         help="Do testing on future timestamps")
+    parser.add_argument("--test_ckpt_index", type=int, default=None,
+                        help="the model checkpoint index to do testing")
     args = parser.parse_args()
 
     if args.do_valid:

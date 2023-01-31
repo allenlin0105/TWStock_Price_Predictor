@@ -1,6 +1,8 @@
 import csv
+from datetime import datetime
 
 import joblib
+import numpy as np
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -25,7 +27,7 @@ def train(args):
     if do_valid:
         splits.append(VALID)
 
-    raw_dates, raw_prices = read_data(*args.data_stock_code_year)
+    raw_dates, raw_prices = read_data(args.stock_code, args.train_start_year)
 
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_prices = scaler.fit_transform(raw_prices.reshape(-1, 1))
