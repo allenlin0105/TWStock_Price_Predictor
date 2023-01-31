@@ -1,5 +1,6 @@
 import csv
 
+import joblib
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
@@ -10,7 +11,8 @@ from sklearn.preprocessing import MinMaxScaler
 from .data_utils import read_data, split_data, StockDataset
 from .loss_utils import RMSELoss, MAPELoss
 from ..model import PricePredictor
-from ..constants import TRAIN, VALID, PREDICTION_FOLDER
+from ..constants import (TRAIN, VALID, TEST, 
+    PREDICTION_FOLDER, MODEL_FILE, SCALER_FILE, TEST_FILE)
 
 
 def train(args):
@@ -52,8 +54,12 @@ def train(args):
 
     logger.info(model)
 
+    model_path = model_folder.joinpath(MODEL_FILE)
+    scaler_path = model_folder.joinpath(SCALER_FILE)
     prediction_folder = model_folder.joinpath(PREDICTION_FOLDER)
     prediction_folder.mkdir(parents=True, exist_ok=True)
+
+    best_result = {'epoch': 0, 'loss': 100}
 
     for epoch in tqdm(range(args.n_epoch)):
         # Training
@@ -108,12 +114,24 @@ def train(args):
         valid_loss /= n_valid
         logger.info(f'Epoch {epoch:03d} | {VALID} | Loss = {valid_loss:.5f}')
 
+        # Save model if better
+        if valid_loss < best_result['loss']:
+            logger.info(f'Save model at epoch {epoch:03d}')
+            torch.save(model.state_dict(), model_path)
+            best_result['loss'] = valid_loss
+            best_result['epoch'] = epoch
+
         valid_prices.sort(key=lambda x: x[0])
         with open(prediction_folder.joinpath(f'{VALID}_{epoch:03d}.csv'), 'w', encoding='utf-8') as fp:
             writer = csv.writer(fp)
             writer.writerow(['date', 'label_price', 'predicted_price'])
             for date, label_price, pred_price in valid_prices:
                 writer.writerow([date, label_price, pred_price])
+
+    logger.info(f"Best model is saved at epoch {best_result['epoch']:03d} with loss = {best_result['loss']:.5f}")
+
+    # Save scaler
+    joblib.dump(scaler, scaler_path)
 
 
 def test(args):
