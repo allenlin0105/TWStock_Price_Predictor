@@ -135,4 +135,39 @@ def train(args):
 
 
 def test(args):
-    return
+    device = args.device
+    model_folder = args.model_folder
+
+    raw_dates, raw_prices = read_data(args.stock_code, datetime.now().year)
+    if len(raw_prices) < 20:
+        raw_dates, raw_prices = read_data(args.stock_code, datetime.now().year - 1)
+
+    scaler_path = model_folder.joinpath(SCALER_FILE)
+    scaler = joblib.load(scaler_path)
+    scaled_prices = scaler.fit_transform(raw_prices.reshape(-1, 1))
+    input_data = split_data(raw_dates, scaled_prices, TEST)['source']
+    original_prices = scaler.inverse_transform(np.array(input_data[0]).reshape(-1, 1)).reshape(-1)
+
+    model = PricePredictor(args).to(device)
+    model_path = model_folder.joinpath(MODEL_FILE)
+    model.load_state_dict(torch.load(model_path))
+    model.eval()
+
+    predict_days = 5  # number of days to predict
+    predict_prices = []
+    for i in range(predict_days): 
+        with torch.no_grad():
+            reshaped_data = torch.tensor(input_data).unsqueeze(2)
+            pred_prices = model(reshaped_data.to(device))
+            input_data[0] = input_data[0][1:] + [pred_prices[0][0].cpu().item()]
+            rescaled_pred_prices = scaler.inverse_transform(pred_prices.cpu().detach().numpy())
+            predict_prices.append(rescaled_pred_prices[0][0])
+
+    prediction_folder = model_folder.joinpath(PREDICTION_FOLDER)
+    with open(prediction_folder.joinpath(TEST_FILE), 'w', encoding='utf-8') as fp:
+        writer = csv.writer(fp)
+        writer.writerow(['date', 'predict_price'])
+        for i, original_price in enumerate(original_prices):
+            writer.writerow([f'origin_{i + 1}', original_price])
+        for i, predict_price in enumerate(predict_prices):
+            writer.writerow([f'future_{i + 1}', predict_price])
