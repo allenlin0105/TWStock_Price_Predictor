@@ -12,7 +12,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from .data_utils import read_data, split_data, StockDataset
 from .loss_utils import RMSELoss, MAPELoss
-from ..model import PricePredictor
+from ..model import LSTMPredictor, TransformerEncoderPredictor
 from ..constants import (TRAIN, VALID, TEST, 
     PREDICTION_FOLDER, MODEL_FILE, SCALER_FILE, TEST_FILE)
 
@@ -42,7 +42,13 @@ def train(args):
         shuffle=(split == TRAIN)
     ) for split, dataset in datasets.items()}
 
-    model = PricePredictor(args).to(device)
+    if args.model_type == 'lstm':
+        model = LSTMPredictor(args).to(device)
+    elif args.model_type == 'transformer':
+        model = TransformerEncoderPredictor(args).to(device)
+    else:
+        raise ValueError('The model type is not defined.')
+
     if args.loss_func == 'mse':
         loss_func = nn.MSELoss()
     elif args.loss_func == 'rmse':
@@ -52,7 +58,7 @@ def train(args):
     else:
         raise ValueError('The loss function is not defined.')
     optimizer = optim.AdamW(model.parameters(), lr=args.lr)
-    # scheduler = ExponentialLR(optimizer, gamma=0.95)
+    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
 
     logger.info(model)
 
@@ -81,7 +87,7 @@ def train(args):
             rescaled_pred_prices = scaler.inverse_transform(pred_prices.cpu().detach().numpy())
             train_prices += [[date, label_price[0], pred_price[0]]
                 for date, label_price, pred_price in zip(label_dates, rescaled_labels, rescaled_pred_prices)]
-        # scheduler.step()
+        scheduler.step()
 
         n_train = len(datasets[TRAIN])
         train_loss /= n_train
@@ -150,7 +156,12 @@ def test(args):
     input_data = split_data(raw_dates, scaled_prices, TEST)['source']
     original_prices = scaler.inverse_transform(np.array(input_data[0]).reshape(-1, 1)).reshape(-1)
 
-    model = PricePredictor(args).to(device)
+    if args.model_type == 'lstm':
+        model = LSTMPredictor(args).to(device)
+    elif args.model_type == 'transformer':
+        model = TransformerEncoderPredictor(args).to(device)
+    else:
+        raise ValueError('The model type is not defined.')
     model_path = model_folder.joinpath(MODEL_FILE)
     model.load_state_dict(torch.load(model_path))
     model.eval()
