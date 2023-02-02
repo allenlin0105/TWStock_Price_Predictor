@@ -49,6 +49,14 @@ def save_params(saved_object, params_file):
     for key, value in saved_object.items():
         if isinstance(value, torch.device) or isinstance(value, Path):
             saved_object[key] = str(saved_object[key])
+
+    # remove other models' parameters
+    if saved_object['model_type'] == 'lstm':
+        del saved_object['d_model']
+        del saved_object['n_head']
+    elif saved_object['model_type'] == 'transformer':
+        del saved_object['hidden_size']
+
     with open(params_file, "w", encoding='utf-8') as fp:
         json.dump(saved_object, fp, indent=4)
 

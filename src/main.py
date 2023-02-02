@@ -17,10 +17,18 @@ def main():
                         help="the device to train and test the model")
 
     # model
+    parser.add_argument("--model_type", type=str, default='lstm', 
+                        help='model to use, should be "lstm" or "transformer"')
+    ## lstm
     parser.add_argument("--hidden_size", type=int, default=128, help="hidden size of lstm")
-    parser.add_argument("--n_layer", type=int, default=2, help="layer of lstm")
-    parser.add_argument("--dropout", type=float, default=0.2, help="dropout of lstm")
-    parser.add_argument("--fc_layer", type=int, default=1, help="layer of fc")
+    ## transformer
+    parser.add_argument("--d_model", type=int, default=32, help="dimension of transformer")
+    parser.add_argument("--n_head", type=int, default=2, help="number of heads of transformer")
+    ## both
+    parser.add_argument("--n_layer", type=int, default=2, help="layer of lstm or transformer")
+    parser.add_argument("--fc_layer", type=int, default=1, help="layer of lstm fc or transformer fc")
+    parser.add_argument("--fc_dim", type=int, default=32, help="hidden dimension size of feed forward")
+    parser.add_argument("--dropout", type=float, default=0.2, help="dropout of model")
 
     # train
     parser.add_argument("--seed", type=int, default=123, help="random seed")
