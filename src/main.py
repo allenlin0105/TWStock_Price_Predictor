@@ -32,6 +32,8 @@ def main():
 
     # train
     parser.add_argument("--seed", type=int, default=123, help="random seed")
+    parser.add_argument("--n_input_days", type=int, default=20,
+                        help="the number of days used as input")
     parser.add_argument("--lr", type=float, default=1e-4, help="learning rate for training")
     parser.add_argument("--batch_size", type=int, default=64, help="batch size for training")
     parser.add_argument("--n_epoch", type=int, default=10, help="number of training epoch")

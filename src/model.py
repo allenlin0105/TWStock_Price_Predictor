@@ -78,7 +78,7 @@ class TransformerEncoderPredictor(nn.Module):
             ),
             num_layers=args.n_layer
         )
-        self.fc = FeedForward(args.fc_layer, args.d_model * 20, args.fc_dim, 1)
+        self.fc = FeedForward(args.fc_layer, args.d_model * args.n_input_days, args.fc_dim, 1)
     
     def forward(self, x):  # x: [batch_size, seq_len, dim]
         x = self.input_layer(x)

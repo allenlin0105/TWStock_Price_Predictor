@@ -39,28 +39,26 @@ def read_data(stock_code, year):
     return dates, np.array(prices)
 
 
-def split_data(raw_dates, scaled_prices, split, do_valid=False):
-    input_date_period = 20  # use 20 days to predict
-
+def split_data(raw_dates, scaled_prices, split, n_input_days=20, do_valid=False):
     train_ratio = 0.9 if do_valid else 1.0
     if split == TRAIN:
         bound = int(len(raw_dates) * train_ratio)
         dates = raw_dates[:bound]
         close_prices = scaled_prices[:bound, :].reshape(-1)
     elif split == VALID:
-        bound = int(len(raw_dates) * train_ratio) - input_date_period
+        bound = int(len(raw_dates) * train_ratio) - n_input_days
         dates = raw_dates[bound:]
         close_prices = scaled_prices[bound:, :].reshape(-1)
     elif split == TEST:
-        close_prices = scaled_prices[-input_date_period:, :].reshape(-1)
+        close_prices = scaled_prices[-n_input_days:, :].reshape(-1)
         close_prices = np.append(close_prices, 0)
     else:
         raise ValueError('split variable should be "train", "valid", or "test"')
 
     feed_data = {'source': [], 'label': [], 'predict_date': []}
-    for i in range(0, len(close_prices) - input_date_period):
-        feed_data['source'].append(close_prices[i: i + input_date_period].tolist())
+    for i in range(0, len(close_prices) - n_input_days):
+        feed_data['source'].append(close_prices[i: i + n_input_days].tolist())
         if split == TRAIN or split == VALID:
-            feed_data['label'].append(close_prices[i + input_date_period])
-            feed_data['predict_date'].append(dates[i + input_date_period])
+            feed_data['label'].append(close_prices[i + n_input_days])
+            feed_data['predict_date'].append(dates[i + n_input_days])
     return feed_data

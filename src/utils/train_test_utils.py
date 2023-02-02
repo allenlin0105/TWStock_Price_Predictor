@@ -32,7 +32,7 @@ def train(args):
     scaler = MinMaxScaler(feature_range=(0, 1))
     scaled_prices = scaler.fit_transform(raw_prices.reshape(-1, 1))
 
-    splitted_data = {split: split_data(raw_dates, scaled_prices, split, do_valid)
+    splitted_data = {split: split_data(raw_dates, scaled_prices, split, args.n_input_days, do_valid)
         for split in splits}
     datasets = {split: StockDataset(data)
         for split, data in splitted_data.items()}
@@ -153,7 +153,7 @@ def test(args):
     scaler_path = model_folder.joinpath(SCALER_FILE)
     scaler = joblib.load(scaler_path)
     scaled_prices = scaler.fit_transform(raw_prices.reshape(-1, 1))
-    input_data = split_data(raw_dates, scaled_prices, TEST)['source']
+    input_data = split_data(raw_dates, scaled_prices, TEST, args.n_input_days)['source']
     original_prices = scaler.inverse_transform(np.array(input_data[0]).reshape(-1, 1)).reshape(-1)
 
     if args.model_type == 'lstm':
