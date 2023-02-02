@@ -5,8 +5,8 @@ fetch-data:
 train-with-valid:
 	python3 -m src.main --stock_code 2330 --train_start_year 2010 \
 		--do_train --do_valid \
-		--hidden_size 32 --fc_layer 1 \
-		--batch_size 64 --n_epoch 50 --loss_func rmse
+		--model_type transformer --d_model 64 --n_head 4 --n_layer 2 --fc_layer 2 --fc_dim 64 \
+		--batch_size 128 --n_epoch 100
 
 train-full-data:
 	python3 -m src.main  --stock_code 2330 --train_start_year 2010 \
@@ -17,14 +17,14 @@ train-full-data:
 test-model:
 	python3 -m src.main --stock_code 2330 \
 		--do_test \
-		--hidden_size 32 --fc_layer 1
+		--model_type transformer --d_model 64 --n_head 4 --n_layer 2 --fc_layer 2 --fc_dim 64
 
 visualize-loss:
 	python3 -m src.visualize --stock_code 2330 --plot_loss
 
 visualize-train-price:
 	python3 -m src.visualize --stock_code 2330 \
-		--plot_train_price --visualize_epoch 49
+		--plot_train_price --visualize_epoch 2
 
 visualize-test-price:
 	python3 -m src.visualize --stock_code 2330 \
