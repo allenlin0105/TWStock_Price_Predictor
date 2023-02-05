@@ -1,3 +1,5 @@
+MODEL=transformer
+
 fetch-data:
 	python3 -m src.data_fetcher --stock_code 2330 \
 		--start_year_month 2010 1
@@ -5,8 +7,8 @@ fetch-data:
 train-with-valid:
 	python3 -m src.main --stock_code 2330 --train_start_year 2010 \
 		--do_train --do_valid \
-		--model_type transformer --d_model 64 --n_head 4 --n_layer 2 --fc_layer 2 --fc_dim 64 \
-		--batch_size 128 --n_epoch 100
+		--model_type ${MODEL} --d_model 32 --n_head 4 --n_layer 2 --fc_layer 1 \
+		--batch_size 128 --n_epoch 50
 
 train-full-data:
 	python3 -m src.main  --stock_code 2330 --train_start_year 2010 \
@@ -17,7 +19,7 @@ train-full-data:
 test-model:
 	python3 -m src.main --stock_code 2330 \
 		--do_test \
-		--model_type transformer --d_model 64 --n_head 4 --n_layer 2 --fc_layer 2 --fc_dim 64
+		--model_type ${MODEL} --d_model 32 --n_head 4 --n_layer 2 --fc_layer 1
 
 visualize-loss:
 	python3 -m src.visualize --stock_code 2330 --plot_loss
