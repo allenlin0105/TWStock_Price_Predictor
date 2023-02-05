@@ -18,10 +18,10 @@ def main():
 
     # model
     parser.add_argument("--model_type", type=str, default='lstm', 
-                        help='model to use, should be "lstm" or "transformer"')
+                        help='model to use, should be "lstm", "encoder", or "transformer"')
     ## lstm
     parser.add_argument("--hidden_size", type=int, default=128, help="hidden size of lstm")
-    ## transformer
+    ## encoder, transformer
     parser.add_argument("--d_model", type=int, default=32, help="dimension of transformer")
     parser.add_argument("--n_head", type=int, default=2, help="number of heads of transformer")
     ## both

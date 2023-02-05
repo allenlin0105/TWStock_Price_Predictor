@@ -12,7 +12,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from .data_utils import read_data, split_data, StockDataset
 from .loss_utils import RMSELoss, MAPELoss
-from ..model import LSTMPredictor, TransformerEncoderPredictor
+from ..model import LSTMPredictor, EncoderPredictor, TransformerPredictor
 from ..constants import (TRAIN, VALID, TEST, 
     PREDICTION_FOLDER, MODEL_FILE, SCALER_FILE, TEST_FILE)
 
@@ -44,10 +44,13 @@ def train(args):
 
     if args.model_type == 'lstm':
         model = LSTMPredictor(args).to(device)
+    elif args.model_type == 'encoder':
+        model = EncoderPredictor(args).to(device)
     elif args.model_type == 'transformer':
-        model = TransformerEncoderPredictor(args).to(device)
+        model = TransformerPredictor(args).to(device)
     else:
         raise ValueError('The model type is not defined.')
+    logger.info(model)
 
     if args.loss_func == 'mse':
         loss_func = nn.MSELoss()
@@ -59,8 +62,6 @@ def train(args):
         raise ValueError('The loss function is not defined.')
     optimizer = optim.AdamW(model.parameters(), lr=args.lr)
     scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.95)
-
-    logger.info(model)
 
     model_path = model_folder.joinpath(MODEL_FILE)
     scaler_path = model_folder.joinpath(SCALER_FILE)
@@ -158,8 +159,10 @@ def test(args):
 
     if args.model_type == 'lstm':
         model = LSTMPredictor(args).to(device)
+    elif args.model_type == 'encoder':
+        model = EncoderPredictor(args).to(device)
     elif args.model_type == 'transformer':
-        model = TransformerEncoderPredictor(args).to(device)
+        model = TransformerPredictor(args).to(device)
     else:
         raise ValueError('The model type is not defined.')
     model_path = model_folder.joinpath(MODEL_FILE)

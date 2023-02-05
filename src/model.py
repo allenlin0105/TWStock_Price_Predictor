@@ -61,7 +61,7 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0)]
         return self.dropout(x)
 
-class TransformerEncoderPredictor(nn.Module):
+class EncoderPredictor(nn.Module):
     def __init__(self, args):
         super().__init__()
         self.input_layer = nn.Linear(1, args.d_model)
@@ -80,7 +80,7 @@ class TransformerEncoderPredictor(nn.Module):
         )
         self.fc = FeedForward(args.fc_layer, args.d_model * args.n_input_days, args.fc_dim, 1)
     
-    def forward(self, x):  # x: [batch_size, seq_len, dim]
+    def forward(self, x):  # x: [batch_size, seq_len, 1]
         x = self.input_layer(x)
         x = x.permute(1, 0, 2)  # x: [seq_len, batch_size, dim]
         x = self.positional_encoder(x)
@@ -89,3 +89,58 @@ class TransformerEncoderPredictor(nn.Module):
         x = x.reshape(x.size(0), -1)  # x: [batch_size, seq_len * dim] 
         x = self.fc(x)
         return x
+
+
+class TransformerPredictor(nn.Module):
+    def __init__(self, args): 
+        super().__init__()
+
+        d_model = args.d_model
+        n_head = args.n_head
+        n_layer = args.n_layer
+        dropout = args.dropout
+        
+        self.encoder_input_layer = nn.Linear(1, d_model)
+        self.positional_encoder = PositionalEncoding(
+            d_model=d_model,
+            dropout=dropout
+        )
+        self.encoder = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(
+                d_model=d_model, 
+                nhead=n_head,
+                dim_feedforward=d_model,
+                dropout=dropout
+            ),
+            num_layers=n_layer
+        )
+
+        self.decoder_input_layer = nn.Linear(1, d_model)
+        self.decoder = nn.TransformerDecoder(
+            nn.TransformerDecoderLayer(
+                d_model=d_model,
+                nhead=n_head,
+                dim_feedforward=d_model,
+                dropout=dropout
+            ),
+            num_layers=n_layer
+        )
+        self.decoder_fc = FeedForward(args.fc_layer, d_model, args.fc_dim, 1)
+
+    def forward(self, x):
+        source = x  # [batch_size, seq_len, 1]
+        target = x[:, -1, :].unsqueeze(1)  # [batch_size, 1, 1]
+
+        source = self.encoder_input_layer(source)
+        source = source.permute(1, 0, 2)
+        source = self.positional_encoder(source)
+        source = self.encoder(source)
+
+        decoder_output = self.decoder_input_layer(target)
+        decoder_output = decoder_output.permute(1, 0, 2)
+        decoder_output = self.decoder(decoder_output, source)
+        decoder_output = decoder_output.permute(1, 0, 2)
+        decoder_output = self.decoder_fc(decoder_output)
+        decoder_output = decoder_output.squeeze(2)
+
+        return decoder_output

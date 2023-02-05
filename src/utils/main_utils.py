@@ -54,7 +54,7 @@ def save_params(saved_object, params_file):
     if saved_object['model_type'] == 'lstm':
         del saved_object['d_model']
         del saved_object['n_head']
-    elif saved_object['model_type'] == 'transformer':
+    elif saved_object['model_type'] == 'encoder' or saved_object['model_type'] == 'transformer':
         del saved_object['hidden_size']
 
     with open(params_file, "w", encoding='utf-8') as fp:
