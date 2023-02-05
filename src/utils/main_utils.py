@@ -1,3 +1,4 @@
+import json
 import random
 import logging
 from pathlib import Path
@@ -19,7 +20,7 @@ def fix_random_seed(seed):
     torch.backends.cudnn.deterministic = True
 
 
-def get_model_folder(stock_code):
+def create_new_model_folder(stock_code):
     model_folder = Path(MODEL_CKPT_FOLDER, stock_code)
     model_folder.mkdir(parents=True, exist_ok=True)
 
@@ -34,6 +35,30 @@ def get_model_folder(stock_code):
     model_folder.mkdir()
 
     return model_folder
+
+def get_exist_model_folder(stock_code, ckpt_index):
+    model_folder = Path(MODEL_CKPT_FOLDER, stock_code)
+    if ckpt_index is None:
+        existed_ckpt_indices = [int(file_path.name) for file_path in model_folder.iterdir()]
+        ckpt_index = max(existed_ckpt_indices)
+    model_folder = model_folder.joinpath(f'{ckpt_index:03d}')
+    return  model_folder
+
+
+def save_params(saved_object, params_file):
+    for key, value in saved_object.items():
+        if isinstance(value, torch.device) or isinstance(value, Path):
+            saved_object[key] = str(saved_object[key])
+
+    # remove other models' parameters
+    if saved_object['model_type'] == 'lstm':
+        del saved_object['d_model']
+        del saved_object['n_head']
+    elif saved_object['model_type'] == 'encoder' or saved_object['model_type'] == 'transformer':
+        del saved_object['hidden_size']
+
+    with open(params_file, "w", encoding='utf-8') as fp:
+        json.dump(saved_object, fp, indent=4)
 
 
 def set_up_logger(log_file):
