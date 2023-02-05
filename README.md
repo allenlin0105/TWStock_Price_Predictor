@@ -5,13 +5,18 @@ A tool which predicts twstock price by using deep learning techniques.
 I predict 2330 as an example. I fetch the closing stock price from 2010 and split 90% as training, 10% as validation.
 
 The following two figures are the predicted stock prices for training and validation.
-| Training | Validation |
-| --- | --- |
-| ![Training](figure/training.png) | ![Validation](figure/validation.png) |
+| Training |
+| --- |
+| ![Training](figure/training.png) |
+
+| Validation |
+| --- |
+| ![Validation](figure/validation.png) |
 
 For testing, I use recently 20 days to predict future 5 days trend. The following figure is a demo.
-
-![Testing](figure/testing.png)
+| Testing |
+| --- |
+| ![Testing](figure/testing.png) |
 
 
 ## How to run
