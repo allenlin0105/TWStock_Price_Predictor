@@ -29,7 +29,8 @@ def main():
     if args.plot_train_price:
         for split in [TRAIN, VALID]:
             price_csv_file = model_folder.joinpath(PREDICTION_FOLDER, f'{split}_{args.visualize_epoch:03d}.csv')
-            plot_train_price(price_csv_file, visualize_folder)
+            if price_csv_file.exists():
+                plot_train_price(price_csv_file, visualize_folder)
 
     if args.plot_test_price:
         plot_test_price(model_folder.joinpath(PREDICTION_FOLDER, TEST_FILE), visualize_folder)
