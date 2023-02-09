@@ -26,7 +26,7 @@ visualize-loss:
 
 visualize-train-price:
 	python3 -m src.visualize --stock_code 2330 \
-		--plot_train_price --visualize_epoch 1
+		--plot_train_price --visualize_epoch 2
 
 visualize-test-price:
 	python3 -m src.visualize --stock_code 2330 \
