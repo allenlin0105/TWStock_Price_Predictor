@@ -125,16 +125,18 @@ def train(args):
 def test(args):
     device = args.device
     model_folder = args.model_folder
+    n_input_days = args.n_input_days
 
     raw_dates, raw_prices = read_data(args.stock_code, datetime.now().year)
-    if len(raw_prices) < 20:
+    if len(raw_prices) < n_input_days:
         raw_dates, raw_prices = read_data(args.stock_code, datetime.now().year - 1)
 
     scaler_path = model_folder.joinpath(SCALER_FILE)
     scaler = joblib.load(scaler_path)
     scaled_prices = scaler.fit_transform(raw_prices.reshape(-1, 1))
-    input_data = split_data(raw_dates, scaled_prices, TEST, args.n_input_days)['source']
+    input_data = split_data(raw_dates, scaled_prices, TEST, n_input_days)['source']
     original_prices = scaler.inverse_transform(np.array(input_data[0]).reshape(-1, 1)).reshape(-1)
+    original_dates = raw_dates[-n_input_days:]
 
     if args.model_type == 'lstm':
         model = LSTMPredictor(args).to(device)
@@ -163,6 +165,6 @@ def test(args):
         writer = csv.writer(fp)
         writer.writerow(['date', 'predict_price'])
         for i, original_price in enumerate(original_prices):
-            writer.writerow([f'origin_{i + 1}', original_price])
+            writer.writerow([f'origin_{i + 1}_{original_dates[i].replace("_", "-")}', original_price])
         for i, predict_price in enumerate(predict_prices):
             writer.writerow([f'future_{i + 1}', predict_price])

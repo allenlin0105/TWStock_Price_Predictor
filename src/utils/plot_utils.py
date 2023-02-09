@@ -93,12 +93,15 @@ def plot_test_price(csv_file, visualize_folder):
     }
 
     price_data = []  # a list of [source_type, price]
+    source_dates = []
     with open(csv_file, 'r', encoding='utf-8') as fp:
         reader = csv.reader(fp)
         next(reader, None)
         for row in reader:
             source_type, price = row[0].split('_')[0], float(row[1])
             price_data.append([source_type, price])
+            if source_type == 'origin':
+                source_dates.append(row[0].split('_')[2])
 
     print('Plot...')
     sns.set(
@@ -116,6 +119,7 @@ def plot_test_price(csv_file, visualize_folder):
         )
     
     # define labels
+    plt.title(f"Use data from {source_dates[0]} to {source_dates[-1]}, Predict future {len(price_data) - len(source_dates)} days")
     plt.xlabel("Date")
     plt.ylabel("Price")
     
