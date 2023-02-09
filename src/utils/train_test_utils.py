@@ -99,7 +99,7 @@ def train(args):
                         for date, label_price, pred_price in zip(label_dates, rescaled_labels, rescaled_pred_prices)]
 
             loss /= len(datasets[split])
-            logger.info(f'Epoch {epoch:03d} | {split} | Loss = {loss:.5f}')
+            logger.info(f'Epoch {epoch:03d} | {split} | Loss = {loss}')
 
             prices.sort(key=lambda x: x[0])
             with open(prediction_folder.joinpath(f'{split}_{epoch:03d}.csv'), 'w', encoding='utf-8') as fp:
@@ -116,7 +116,7 @@ def train(args):
                 best_result['loss'] = loss
                 best_result['epoch'] = epoch
 
-    logger.info(f"Best model is saved at epoch {best_result['epoch']:03d} with loss = {best_result['loss']:.5f}")
+    logger.info(f"Best model is saved at epoch {best_result['epoch']:03d} with loss = {best_result['loss']}")
 
     # Save scaler
     joblib.dump(scaler, scaler_path)
