@@ -87,12 +87,12 @@ def plot_test_price(csv_file, visualize_folder):
             'linestyle': '-'
         },
         'future': {
-            'color': 'blue',
+            'color': 'gray',
             'linestyle': '--'
         }
     }
 
-    price_data = []
+    price_data = []  # a list of [source_type, price]
     with open(csv_file, 'r', encoding='utf-8') as fp:
         reader = csv.reader(fp)
         next(reader, None)
@@ -107,9 +107,10 @@ def plot_test_price(csv_file, visualize_folder):
     )
 
     # plot lines
-    for i, (source_type, price) in enumerate(price_data[:-1]):
+    for i in range(len(price_data) - 1):
+        source_type = price_data[i + 1][0]
         sns.lineplot(
-            x=[i, i + 1], y=[price, price_data[i + 1][1]], 
+            x=[i + 1, i + 2], y=[price_data[i][1], price_data[i + 1][1]], 
             color=figure_settings[source_type]['color'],
             linestyle=figure_settings[source_type]['linestyle']
         )
